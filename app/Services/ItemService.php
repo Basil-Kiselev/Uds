@@ -18,8 +18,6 @@ class ItemService
                 'type' => $dto->getType(),
                 'price' => $dto->getPrice(),
                 'description' => $dto->getDescription(),
-//                'measurement' => $dto->getMeasurement(),
-//                'inventory' => $dto->getInventory(),
                 'minQuantity' => $dto->getMinQuantity(),
                 'increment' => $dto->getIncrement(),
         ];
@@ -30,8 +28,6 @@ class ItemService
                 'type' => $dto->getType(),
                 'price' => $dto->getPrice(),
                 'description' => $dto->getDescription(),
-//                'measurement' => $dto->getMeasurement(),
-//                'inventory' => $dto->getInventory(),
                 'minQuantity' => $dto->getMinQuantity(),
                 'increment' => $dto->getIncrement(),
             ],
@@ -42,6 +38,12 @@ class ItemService
 
         $localItem = Item::query()->create($dataLocal);
         $result = (new UdsClient($companyId, $apiKey))->create($url,$data);
+
+        $udsRespon = json_decode((json_encode($result)), true) ;
+
+        $localItem->update([
+            'uds_id' => $udsRespon['id']
+        ]);
 
         return $result;
     }

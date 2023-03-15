@@ -15,7 +15,8 @@ return new class extends Migration
     {
         Schema::create('items', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->integer('uds_id')->nullable();
+            $table->string('name')->nullable();
             $table->integer('node_id')->nullable();
             $table->string('external_id')->nullable();
             $table->string('type')->nullable();
