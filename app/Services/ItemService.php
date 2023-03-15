@@ -38,7 +38,7 @@ class ItemService
 
         $localItem = Item::query()->create($dataLocal);
         $result = (new UdsClient($companyId, $apiKey))->create($url,$data);
-
+        //проверить возврат функции (перекодировка в джсон)
         $udsRespon = json_decode((json_encode($result)), true) ;
 
         $localItem->update([
@@ -46,5 +46,15 @@ class ItemService
         ]);
 
         return $result;
+    }
+
+    public function getItem($id)
+    {
+        $setting = Setting::query()->find('1');
+        $apiKey = $setting['api_key'];
+        $companyId = $setting['company_id'];
+        $url = "https://api.uds.app/partner/v2/goods" . '/' . $id;
+
+        return $result = (new UdsClient($companyId, $apiKey))->get($url);
     }
 }

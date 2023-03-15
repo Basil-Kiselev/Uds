@@ -9,9 +9,7 @@ class ItemCreateDto
         public string $name,
         public string $type,
         public float $price,
-//        public string $measurement,
         public string $description,
-//        public string $inventory,
         public float $minQuantity,
         public float $increment,
 
@@ -36,16 +34,6 @@ class ItemCreateDto
     {
         return $this->description;
     }
-
-//    public function getMeasurement(): string
-//    {
-//        return $this->measurement;
-//    }
-
-//    public function getInventory(): string
-//    {
-//        return $this->inventory;
-//    }
 
     public function getMinQuantity(): float
     {

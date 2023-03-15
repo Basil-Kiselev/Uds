@@ -69,16 +69,6 @@ class ItemCreateRequest extends FormRequest
         return $this->input('description');
     }
 
-//    public function getMeasurement(): string
-//    {
-//        return $this->input('measurement');
-//    }
-
-//    public function getInventory(): string
-//    {
-//        return $this->input('inventory');
-//    }
-
     public function getMinQuantity(): float
     {
         return $this->input('minQuantity');
