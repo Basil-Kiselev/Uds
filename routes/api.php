@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ItemController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -17,5 +18,5 @@ use Illuminate\Support\Facades\Route;
 //Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //    return $request->user();
 //});
-Route::post('goods', [App\Http\Controllers\ItemController::class, 'createItem']);
-
+Route::post('goods', [ItemController::class, 'createItem']);
+Route::get('goods/{id}', [ItemController::class, 'getItem']);
