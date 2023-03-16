@@ -20,3 +20,7 @@ use Illuminate\Support\Facades\Route;
 //});
 Route::post('goods', [ItemController::class, 'createItem']);
 Route::get('goods/{id}', [ItemController::class, 'getItem']);
+Route::delete('goods/{id}', [ItemController::class, 'deleteItem']);
+Route::put('goods/{id}', [ItemController::class, 'updateItem']);
+
+

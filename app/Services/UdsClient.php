@@ -4,7 +4,6 @@ namespace App\Services;
 
 use GuzzleHttp\Client;
 use DateTime;
-use DateTimeInterface;
 use Illuminate\Support\Str;
 
 class UdsClient
@@ -45,7 +44,36 @@ class UdsClient
             'Accept' => 'application/json',
             'X-Origin-Request-Id' => $uuid,
             'X-Timestamp' => $date->format(DateTime::ATOM),
-            'http_errors' => false,            
+            'http_errors' => false,
+        ]);
+
+        return json_decode($result->getBody());
+    }
+
+    public function delete($url)
+    {
+        $date = new DateTime();
+        $uuid = Str::uuid();
+        $result = $this->client->request('delete', $url, [
+            'Accept' => 'application/json',
+            'X-Origin-Request-Id' => $uuid,
+            'X-Timestamp' => $date->format(DateTime::ATOM),
+            'http_errors' => false,
+        ]);
+
+        return json_decode($result->getBody());
+    }
+
+    public function update($url, $data)
+    {
+        $date = new DateTime();
+        $uuid = Str::uuid();
+        $result = $this->client->request('put', $url, [
+            'Accept' => 'application/json',
+            'X-Origin-Request-Id' => $uuid,
+            'X-Timestamp' => $date->format(DateTime::ATOM),
+            'http_errors' => false,
+            'body' => json_encode($data),
         ]);
 
         return json_decode($result->getBody());

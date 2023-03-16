@@ -4,46 +4,21 @@ namespace App\Services;
 
 use App\Models\Item;
 use App\Models\Setting;
-use App\Services\Dto\ItemCreateDto;
-
+require_once "config.php";
 
 class ItemService
 {
-    public function createItem(ItemCreateDto $dto)
+    public function createItem($data)
     {
-        $url = "https://api.uds.app/partner/v2/goods";
-
-        $dataLocal = [
-            'name' => $dto->getName(),
-                'type' => $dto->getType(),
-                'price' => $dto->getPrice(),
-                'description' => $dto->getDescription(),
-                'minQuantity' => $dto->getMinQuantity(),
-                'increment' => $dto->getIncrement(),
-        ];
-
-        $data = [
-            'name' => $dto->getName(),
-            'data' => [
-                'type' => $dto->getType(),
-                'price' => $dto->getPrice(),
-                'description' => $dto->getDescription(),
-                'minQuantity' => $dto->getMinQuantity(),
-                'increment' => $dto->getIncrement(),
-            ],
-        ];
+        $url = (new UrlItem())->getUrl();
         $setting = Setting::query()->find('1');
         $apiKey = $setting['api_key'];
         $companyId = $setting['company_id'];
 
-        $localItem = Item::query()->create($dataLocal);
         $result = (new UdsClient($companyId, $apiKey))->create($url,$data);
-        //проверить возврат функции (перекодировка в джсон)
-        $udsRespon = json_decode((json_encode($result)), true) ;
-
-        $localItem->update([
-            'uds_id' => $udsRespon['id']
-        ]);
+        $udsRespon = json_decode((json_encode($result)), true);
+        $localData = ['uds_id' => $udsRespon['id']];
+        Item::query()->create($localData);
 
         return $result;
     }
@@ -53,8 +28,35 @@ class ItemService
         $setting = Setting::query()->find('1');
         $apiKey = $setting['api_key'];
         $companyId = $setting['company_id'];
-        $url = "https://api.uds.app/partner/v2/goods" . '/' . $id;
+        $url = (new UrlItem())->getUrl(). '/' . $id;
 
-        return $result = (new UdsClient($companyId, $apiKey))->get($url);
+        return (new UdsClient($companyId, $apiKey))->get($url);
+    }
+
+    public function deleteItem($id)
+    {
+        Item::query()->where('uds_id', $id)->delete();
+        $setting = Setting::query()->find('1');
+        $apiKey = $setting['api_key'];
+        $companyId = $setting['company_id'];
+        $url = (new UrlItem())->getUrl(). '/' . $id;
+
+        return (new UdsClient($companyId, $apiKey))->delete($url);
+    }
+
+    public function updateItem($id, $data )
+    {
+        $url = (new UrlItem())->getUrl(). '/' . $id;
+
+        $setting = Setting::query()->find('1');
+        $apiKey = $setting['api_key'];
+        $companyId = $setting['company_id'];
+
+        $result = (new UdsClient($companyId, $apiKey))->update($url,$data);
+        $udsRespon = json_decode((json_encode($result)), true);
+        $localData = ['uds_id' => $udsRespon['id']];
+        Item::query()->where('uds_id', $id)->update($localData);
+
+        return $result;
     }
 }
