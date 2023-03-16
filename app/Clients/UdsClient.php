@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Services;
+namespace App\Clients;
 
-use GuzzleHttp\Client;
 use DateTime;
+use GuzzleHttp\Client;
 use Illuminate\Support\Str;
 
 class UdsClient
@@ -33,7 +33,7 @@ class UdsClient
             'body' => json_encode($data),
         ]);
 
-        return json_decode($result->getBody());
+        return json_decode($result->getBody()->getContents());
     }
 
     public function get($url)

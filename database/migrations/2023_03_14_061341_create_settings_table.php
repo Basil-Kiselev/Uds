@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('company_id')->nullable();
             $table->string('api_key')->nullable();
+            $table->string('token')->nullable();
         });
     }
 

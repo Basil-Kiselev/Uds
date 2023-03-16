@@ -2,8 +2,11 @@
 
 namespace App\Services;
 
+use App\Clients\SkladClient;
+use App\Clients\UdsClient;
 use App\Models\Item;
 use App\Models\Setting;
+
 require_once "config.php";
 
 class ItemService
@@ -16,8 +19,7 @@ class ItemService
         $companyId = $setting['company_id'];
 
         $result = (new UdsClient($companyId, $apiKey))->create($url,$data);
-        $udsRespon = json_decode((json_encode($result)), true);
-        $localData = ['uds_id' => $udsRespon['id']];
+        $localData = ['uds_id' => $result->id];
         Item::query()->create($localData);
 
         return $result;
@@ -53,9 +55,32 @@ class ItemService
         $companyId = $setting['company_id'];
 
         $result = (new UdsClient($companyId, $apiKey))->update($url,$data);
-        $udsRespon = json_decode((json_encode($result)), true);
-        $localData = ['uds_id' => $udsRespon['id']];
+        $localData = ['uds_id' => $result->id];
         Item::query()->where('uds_id', $id)->update($localData);
+
+        return $result;
+    }
+
+    public function SkladToUds($id)
+    {
+        $setting = Setting::query()->find('1');
+        $token = $setting['token'];
+        $dataSklad = (new SkladClient($token))->getProduct($id);
+        $data = [
+            'name' => $dataSklad->name,
+            'data' => [
+                'type' => 'ITEM',
+                'description' => $dataSklad->description,
+            ]
+        ];
+        $url = (new UrlItem())->getUrl();
+        $setting = Setting::query()->find('1');
+        $apiKey = $setting['api_key'];
+        $companyId = $setting['company_id'];
+
+        $result = (new UdsClient($companyId, $apiKey))->create($url,$data);
+        $localData = ['uds_id' => $result->id];
+        Item::query()->create($localData);
 
         return $result;
     }
