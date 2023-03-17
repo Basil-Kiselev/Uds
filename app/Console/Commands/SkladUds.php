@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Setting;
 use App\Services\ItemService;
 use Illuminate\Console\Command;
 
@@ -12,7 +13,7 @@ class SkladUds extends Command
      *
      * @var string
      */
-    protected $signature = 'SkladUds';
+    protected $signature = 'SkladUds:create';
 
     /**
      * The console command description.
@@ -26,9 +27,10 @@ class SkladUds extends Command
      *
      * @return int
      */
-    public function handle($id)
+    public function handle()
     {
+        $skladId = '900e0d95-3aec-11ed-0a80-09f3000275ca';
         $skladToUds = new ItemService();
-        $skladToUds->SkladToUds($id);
+        $skladToUds->SkladToUds($skladId);
     }
 }

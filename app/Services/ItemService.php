@@ -66,11 +66,15 @@ class ItemService
         $setting = Setting::query()->find('1');
         $token = $setting['token'];
         $dataSklad = (new SkladClient($token))->getProduct($id);
+        $data = json_decode($dataSklad->getBody()->getContents());
+
         $data = [
-            'name' => $dataSklad->name,
+            'name' => $data->name,
             'data' => [
                 'type' => 'ITEM',
-                'description' => $dataSklad->description,
+                'price' => ($data->salePrices[0]->value/100),
+                'sku' => $data->article ?? null,
+                'description' => $data->description,
             ]
         ];
         $url = (new UrlItem())->getUrl();
@@ -79,6 +83,7 @@ class ItemService
         $companyId = $setting['company_id'];
 
         $result = (new UdsClient($companyId, $apiKey))->create($url,$data);
+
         $localData = ['uds_id' => $result->id];
         Item::query()->create($localData);
 
