@@ -24,4 +24,12 @@ class SkladClient
 
         return $result;
     }
+
+    public function getProducts()
+    {
+        $url = "https://online.moysklad.ru/api/remap/1.2/entity/product/";
+        $result = $this->client->request('get', $url);
+
+        return $result;
+    }
 }

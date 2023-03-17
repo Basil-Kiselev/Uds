@@ -6,6 +6,7 @@ use App\Clients\SkladClient;
 use App\Clients\UdsClient;
 use App\Models\Item;
 use App\Models\Setting;
+use GuzzleHttp\Exception\BadResponseException;
 
 require_once "config.php";
 
@@ -17,7 +18,6 @@ class ItemService
         $setting = Setting::query()->find('1');
         $apiKey = $setting['api_key'];
         $companyId = $setting['company_id'];
-
         $result = (new UdsClient($companyId, $apiKey))->create($url,$data);
         $localData = ['uds_id' => $result->id];
         Item::query()->create($localData);
@@ -49,11 +49,9 @@ class ItemService
     public function updateItem($id, $data )
     {
         $url = (new UrlItem())->getUrl(). '/' . $id;
-
         $setting = Setting::query()->find('1');
         $apiKey = $setting['api_key'];
         $companyId = $setting['company_id'];
-
         $result = (new UdsClient($companyId, $apiKey))->update($url,$data);
         $localData = ['uds_id' => $result->id];
         Item::query()->where('uds_id', $id)->update($localData);
@@ -61,32 +59,47 @@ class ItemService
         return $result;
     }
 
-    public function SkladToUds($id)
+    public function SkladToUds()
     {
         $setting = Setting::query()->find('1');
         $token = $setting['token'];
-        $dataSklad = (new SkladClient($token))->getProduct($id);
-        $data = json_decode($dataSklad->getBody()->getContents());
+        $dataSklad = (new SkladClient($token))->getProducts();
+        $dataAll = json_decode($dataSklad->getBody()->getContents());
 
-        $data = [
-            'name' => $data->name,
-            'data' => [
-                'type' => 'ITEM',
-                'price' => ($data->salePrices[0]->value/100),
-                'sku' => $data->article ?? null,
-                'description' => $data->description,
-            ]
-        ];
-        $url = (new UrlItem())->getUrl();
-        $setting = Setting::query()->find('1');
-        $apiKey = $setting['api_key'];
-        $companyId = $setting['company_id'];
+        try {
+            foreach ($dataAll->rows as $data) {
+                $inputId = $data->id;
+                $skladId = Item::query()->where('sklad_id', $inputId)->value('sklad_id');
 
-        $result = (new UdsClient($companyId, $apiKey))->create($url,$data);
+                if(!empty($skladId)) continue;
+                if(($data->salePrices[0]->value) <= 0) continue;
 
-        $localData = ['uds_id' => $result->id];
-        Item::query()->create($localData);
 
-        return $result;
+                $dataBody = [
+                    'name' => $data->name,
+                    'data' => [
+                        'type' => 'ITEM',
+                        'price' => ($data->salePrices[0]->value / 100),
+                        'sku' => $data->article ?? null,
+                        'description' => $data->description ?? null,
+                    ]
+                ];
+                $url = (new UrlItem())->getUrl();
+                $setting = Setting::query()->find('1');
+                $apiKey = $setting['api_key'];
+                $companyId = $setting['company_id'];
+                $result = (new UdsClient($companyId, $apiKey))->create($url, $dataBody);
+                $localData = [
+                    'uds_id' => $result->id,
+                    'sklad_id' => $inputId,
+                ];
+                Item::query()->create($localData);
+            }
+        }
+        catch (BadResponseException $exception) {
+            dd($exception->getMessage());
+        }
+
+        return true;
     }
 }

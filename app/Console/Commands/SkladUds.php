@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Setting;
 use App\Services\ItemService;
 use Illuminate\Console\Command;
 
@@ -29,8 +28,7 @@ class SkladUds extends Command
      */
     public function handle()
     {
-        $skladId = '900e0d95-3aec-11ed-0a80-09f3000275ca';
         $skladToUds = new ItemService();
-        $skladToUds->SkladToUds($skladId);
+        $skladToUds->SkladToUds();
     }
 }
